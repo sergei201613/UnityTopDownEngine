@@ -3,8 +3,7 @@
     "rootNamespace": "TeaGames.Unity.TopDownEngine.Runtime",
     "references": [
         "TeaGames.Unity.GameplayFramework.Runtime",
-        "TeaGames.Unity.Utils.Runtime",
-        "AstarPathfindingProject"
+        "TeaGames.Unity.Utils.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
