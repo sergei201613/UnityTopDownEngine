@@ -1,0 +1,20 @@
+{
+    "name": "TeaGames.Unity.TopDownEngine.Runtime",
+    "rootNamespace": "TeaGames.Unity.TopDownEngine.Runtime",
+    "references": [
+        "TeaGames.Unity.GameplayFramework.Runtime",
+        "TeaGames.Unity.Utils.Runtime",
+        "AstarPathfindingProject"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        ""
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
