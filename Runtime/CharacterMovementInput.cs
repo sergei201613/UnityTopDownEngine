@@ -1,10 +1,11 @@
+using Unity.Netcode;
 using UnityEngine;
 
 namespace TeaGames.Unity.TopDownEngine.Runtime
 {
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-50)]
-    public class CharacterMovementInput : MonoBehaviour
+    public class CharacterMovementInput : NetworkBehaviour
     {
         /// <summary>
         /// Automatically normalized movement direction.
@@ -16,5 +17,11 @@ namespace TeaGames.Unity.TopDownEngine.Runtime
         }
 
         protected Vector2 direction;
+
+        public override void OnNetworkSpawn()
+        {
+            if (!IsOwner)
+                Destroy(this);
+        }
     }
 }

@@ -1,54 +1,76 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 
 namespace TeaGames.Unity.TopDownEngine.Runtime
 {
     [RequireComponent(typeof(CircleCollider2D))]
-    [RequireComponent(typeof(CharacterMovementInput))]
-    public class CharacterMovement : MonoBehaviour
+    public class CharacterMovement : NetworkBehaviour
     {
         [SerializeField] private float speed = 5;
         [SerializeField] private float walkAcceleration = 5;
         [SerializeField] private float walkDeceleration = 5;
         [SerializeField] private LayerMask blockingLayers;
-        
-        private const int ResolveCollisionsIterationCount = 2;
+        [SerializeField] private int _resolveCollisionsIterationCount = 2;
+        [SerializeField] private float _moveInterpSpeed = 5f;
         
         private CircleCollider2D _circleCollider2D;
-        private CharacterMovementInput _input;
+        private CharacterMovementInput _movementInputOwnerOnly;
         private Vector3 _velocity;
-        private Quaternion _targetRotation;
+
+        private readonly NetworkVariable<Vector3> _netPosition = new(
+            writePerm: NetworkVariableWritePermission.Server);
+
+        private readonly NetworkVariable<Vector2> _netInputDir = new(
+            writePerm: NetworkVariableWritePermission.Owner);
 
         private void Awake()
         {
             _circleCollider2D = GetComponent<CircleCollider2D>();
-            _input = GetComponent<CharacterMovementInput>();
-
-            _targetRotation = transform.rotation;
+            _movementInputOwnerOnly = GetComponent<CharacterMovementInput>();
         }
 
         private void Update()
         {
-            var input = _input.NormalizedDirection;
-
-            if (input.magnitude != 0)
+            if (IsOwner)
             {
-                _velocity = Vector3.MoveTowards(_velocity, speed * input, 
+                _netInputDir.Value = _movementInputOwnerOnly.NormalizedDirection;
+            }
+
+            if (IsServer)
+            {
+                Move(_netInputDir.Value.normalized);
+                ResolveCollisions();
+                _netPosition.Value = transform.position;
+            }
+            else
+            {
+                transform.position = Vector3.Lerp(transform.position, 
+                    _netPosition.Value, _moveInterpSpeed * Time.deltaTime);
+
+                Move(_netInputDir.Value);
+                ResolveCollisions();
+            }
+        }
+
+        private void Move(Vector2 ownerInput)
+        {
+            if (ownerInput.magnitude != 0)
+            {
+                _velocity = Vector3.MoveTowards(_velocity, speed * ownerInput,
                     walkAcceleration * Time.deltaTime);
             }
             else
             {
-                _velocity = Vector3.MoveTowards(_velocity, Vector3.zero, 
+                _velocity = Vector3.MoveTowards(_velocity, Vector3.zero,
                     walkDeceleration * Time.deltaTime);
             }
-            
-            transform.position += _velocity * Time.deltaTime;
 
-            ResolveCollisions();
+            transform.position += _velocity * Time.deltaTime;
         }
 
         private void ResolveCollisions()
         {
-            for (var i = 0; i < ResolveCollisionsIterationCount; i++)
+            for (var i = 0; i < _resolveCollisionsIterationCount; i++)
             {
                 var hits = Physics2D.OverlapCircleAll(transform.position, 
                     _circleCollider2D.radius, blockingLayers);

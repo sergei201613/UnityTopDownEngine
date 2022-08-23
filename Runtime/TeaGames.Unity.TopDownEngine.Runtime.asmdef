@@ -3,7 +3,8 @@
     "rootNamespace": "TeaGames.Unity.TopDownEngine.Runtime",
     "references": [
         "TeaGames.Unity.GameplayFramework.Runtime",
-        "TeaGames.Unity.Utils.Runtime"
+        "TeaGames.Unity.Utils.Runtime",
+        "Unity.Netcode.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
